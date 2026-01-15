@@ -37,8 +37,8 @@
     <title>Workday Spreadsheet to ICS</title>
     <head>
         <script src="main.js" type="module"></script>
-        <script src="faculty.js" type="module"></script>
-        <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+        <script src="xlsx.full.min.js" type="module"></script>
+        <!-- <script type="text/javascript" src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script> -->
     </head>
     <body style="background-color:#5aa7a3">
         <ul>
@@ -47,12 +47,17 @@
         </ul>
         <h1>Workday Spreadsheet to ICS</h1>
         <p>Use your downloaded class spreadsheet from Workday to convert into ICS calendar file to upload into your calendar platform of choice</p>
+        <p>Before upload do a save as in excel or however you manage your spreadsheets and give it a any other name then View My Courses to get it into the correct format</p>
         <h4>Name Override (leave blank if you just want to use your on record name)</h4>
         <input type="text" id="nameInput">
         <br><br>
         <input type="file" id="fileInput">
         <br><br>
-        <button type="button" id="convertButton">Convert to ICS</button>
+        <button type="button" id="convertButton">Convert to ICS (Get your calendar file!)</button>
+        <br><br>
+        <button type="button" id="accomendationsButton">Get Accomendations Text</button>
+        <br><br>
+        <button type="button" id="notesOfClassesButton">Get Break Down On Classes (All the infomation on the classes put together into one text file)</button>
     
     </body>
 </html>

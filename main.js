@@ -1,5 +1,43 @@
 
 //JSSoup or DOMParser
+
+async function getFileAsString(filename) {
+  try {
+    const response = await fetch(`./${filename}`); 
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const fileText = await response.text();
+    return fileText;
+  } catch (error) {
+    console.error("Error fetching file:", error);
+  }
+}
+var facultyString = "";
+var facultyArr = [];
+var facultyMap = new Map();
+
+getFileAsString('faculty.txt').then(fileContent => {
+  if (fileContent) {
+    // console.log("File content:", fileContent);
+    // document.getElementById("content-area").innerText = fileContent;
+    facultyString = fileContent;
+    facultyArr = facultyString.split("\n").slice(0,-1);
+    
+    for (var i = 0; i < facultyArr.length; i++) {
+        facultyArr[i] = facultyArr[i].split("|"); 
+    }
+    for (var i = 0; i < facultyArr.length; i++) {
+        // animals.slice(2)
+        facultyMap.set(facultyArr[i][0],facultyArr[i].slice(1)); 
+    }
+    console.log(facultyArr);
+    console.log(facultyMap);
+  }
+});
+
 const daysToShortDays = new Map([
   ["Sunday", "SU"],
   ["Monday", "MO"],
@@ -36,11 +74,11 @@ const shortBuildingToAddress = new Map([//incomplete address list for whole scho
 ]);
 
 
-var accomendationScheduleString = ""
-var classBreakDownString = ""
+var accomendationScheduleString = "";
+var classBreakDownString = "";
 
-var ics = ""
-var icsFileName = "NothingYet"
+var ics = "";
+var icsFileName = "NothingYet";
 var namePerson = "";
 
 
@@ -170,18 +208,7 @@ function getStartDay(daysMeetingStr, classesStartReccuringDate) {
         }
     }
 
-    // for (String s : daysMeetingStrArr) {
-    //     System.out.println(s);
-    //     DayOfWeek meetingDay = strToDayOfWeek.get(s);
-    //     DayOfWeek reccuringStartDay = classesStartReccuringDate.getDayOfWeek();
-    //     if (reccuringStartDay.getValue() <= meetingDay.getValue()) {
-    //     return meetingDay;
-    //     }
-    // }
-
-
     return strToDayOfWeek.get(daysMeetingStrArr[0]);
-    // return strToDayOfWeek.get(daysMeetingStrArr[0]);
 }
 
 function getNextDateOfDayFromDate(startingDate, dayOfWeek) { //Bug that disallows for classes to start on the starting day given
@@ -197,11 +224,6 @@ function getNextDateOfDayFromDate(startingDate, dayOfWeek) { //Bug that disallow
       result = addDays(result,1);
     }
     return result;
-    // result = result.plusDays(daysToAdd);
-    // // while (result.getDayOfWeek() != dayOfWeek) {
-    // //   result = result.plusDays(1);
-    // // }
-    // return result;
 }
 // "Instructor - Ryan Tsang\\nInstructional Format - Lecture\\nDelivery Mode - In-Person (Howe 102)\\n---\\nEmail - rtsang1@stevens.edu\\nPhone - 12012165455\\nInstructor Position - Teaching Assistant Professor\\nDepartment - Engineering and Science\\, Computer Science\\nOffice - Gateway Center S247\\n---"
 // "Wesley J. Howe Center\\, 1 Castle Point Terrace\\, Hoboken\\, NJ 07030\\, USA"
@@ -241,29 +263,6 @@ function makeEvent(eventName, location, description, recurrence, startTime, endT
     return eventString
 }
 
-function downloadSubmittedFile() {
-    //alert(selectedFile)
-    if (ics == "" || selectedFile == null) {
-        return
-    }
-    //const fileContent = "This is the content of the file."; // Or the actual File object
-    const blob = new Blob([ics], { type: "text/plain" }); // Adjust type as needed
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    const nameInput = document.getElementById('nameInput');
-    // console.log(nameInput.value);
-    if (nameInput.value != "") {
-        namePerson = nameInput.value; 
-        console.log(namePerson);
-    }
-    a.download = namePerson + " " + icsFileName+".ics"; // Desired filename
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-}
-
 function getDatesFromRow(sheet, row) {
     // var result = ["1/6/25", "1/9/25"]
     // console.log("Sheet: ")
@@ -291,6 +290,10 @@ function getAddressFromRaw(raw) {
     return (shortBuildingToAddress.has(buildingName)) ? shortBuildingToAddress.get(buildingName) : buildingName
 }
 
+function cleanUpListedData(eN, descript) {
+    return "\n# " + eN + "\n---\n" + descript.replaceAll("\\n", "\n");
+}
+
 function processFileInput(file) {
     const reader = new FileReader();
     
@@ -303,9 +306,15 @@ function processFileInput(file) {
 
         // Convert the sheet to JSON
 
+        // Reset Vars
+        accomendationScheduleString = "";
+        classBreakDownString = "";
+        ics = "";
+
+
         // Do something with the JSON data
         const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
+        const workbook = XLSX.read(data, { type: 'array' }); // WTF: true
         // Get the array of sheet names
         const sheetNames = workbook.SheetNames;
 
@@ -390,7 +399,8 @@ function processFileInput(file) {
 
             // Location String Validation, check if it looks like how it's supposed to look
 
-            // It can look like either of these
+            // It can look like any of these
+            // 10: "Tuesday/Thursday | 9:30 AM - 10:45 AM | Edwin A. Stevens 214\n\nTuesday | 2:30 PM - 3:45 PM | Edwin A. Stevens 224"
             // 10: "Tuesday/Thursday | 9:30 AM - 10:45 AM | Edwin A. Stevens 214"
             // 10: "| Webcampus"
 
@@ -410,9 +420,41 @@ function processFileInput(file) {
             //  e - 12012165455\nInstructor Position - Teaching Assistant Professor\nDep
             //  artment - Engineering and Science\, Computer Science\nOffice - Gateway C
             //  enter S247\n---
-
+            var finalDescription = ""
             if (jsonData[classIndex][11] != " ") { // Instructor
                 description += "Instructor - " + jsonData[classIndex][11];
+                // Additional Instructor Info, happens if there is info to be had on the instructor
+                let instructorName = jsonData[classIndex][11];
+                if (facultyMap.has(instructorName)) { 
+                    var facultyEntry = facultyMap.get(instructorName);
+                    console.log(facultyEntry);
+                    //  \n---\nEmail - rtsang1@stevens.edu\nPhon
+                    //  e - 12012165455\nInstructor Position - Teaching Assistant Professor\nDep
+                    //  artment - Engineering and Science\, Computer Science\nOffice - Gateway C
+                    //  enter S247\n---
+                    let email = facultyEntry[0];
+
+                    finalDescription += "---";
+                    finalDescription += "\\nEmail - " + email;
+                    finalDescription += "\\nPhone - " + facultyEntry[3];
+                    finalDescription += "\\nInstructor Position - " + facultyEntry[1];
+                    finalDescription += "\\nDepartment - " + facultyEntry[5];
+                    finalDescription += "\\nOffice - " + facultyEntry[4];
+                    finalDescription += "\\n---"
+                    // Add commas for proper formatting of the ICS file
+                    finalDescription = finalDescription.replaceAll(",", "\\,");
+
+                    // Accomendation Scheduling Section
+                    // ["CS 496", "A"]
+                    let classCodeInfo = eventName.split(" - ")[0].split("-");
+                    accomendationScheduleString += classCodeInfo[0] + " | "
+                                                +  classCodeInfo[1] + " | "
+                                                +  instructorName + " | "
+                                                +  email + "\n";
+                    //eventName.split(" - ")[0].split("-")[0] + " | " + eventName.split(" - ")[0].split("-")[1] + " | " + instructorCell + " | " + instructor.getEmail() + "\n";
+                    // var classBreakDownString = "";
+
+                }
             } else {
                 description += "Instructor - ?";
             }
@@ -421,7 +463,7 @@ function processFileInput(file) {
             description += "\\n"
             description += "Delivery Mode - " + jsonData[classIndex][9];
             
-            var finalDescription = ""
+            
 
             // console.log("Tuesday/Thursday | 9:30 AM - 10:45 AM |".split(" | "));
             // console.log("Tuesday/Thursday | 9:30 AM - 10:45 AM |".substring(0, "Tuesday/Thursday | 9:30 AM - 10:45 AM |".length-2));
@@ -429,7 +471,7 @@ function processFileInput(file) {
             // Accomendation String Processing and full scheduling string
 
 
-
+            
             if (numOfBar == 4) {
                 console.log("OnCampus Class Multi Event (2)");
                 var eventSplit = jsonData[classIndex][10].split("\n\n");
@@ -451,7 +493,7 @@ function processFileInput(file) {
                     startTime = times[0];
                     endTime = times[1];
                     var date = getNextDateOfDayFromDate(startDay, getStartDay(eventArray[0], startDay));
-
+                    classBreakDownString += cleanUpListedData(eventName, description + additionDescription + finalDescription);
                     ics += makeEvent(eventName, address, description + additionDescription + finalDescription, recurrence, startTime, endTime, date);
                 }
             } else if (numOfBar == 2) { // Normal OnCampus Class
@@ -473,12 +515,14 @@ function processFileInput(file) {
                 startTime = times[0];
                 endTime = times[1];
                 var date = getNextDateOfDayFromDate(startDay, getStartDay(eventArray[0], startDay));
+                classBreakDownString += cleanUpListedData(eventName, description + additionDescription + finalDescription);
                 ics += makeEvent(eventName, address, description + additionDescription + finalDescription, recurrence, startTime, endTime, date);
             } else if (numOfBar == 1) { // Webcampus
                 console.log("Webcampus");
-                location = "Webcampus";
+                address = "Webcampus";
                 startTime = "";
                 endTime = "";
+                classBreakDownString += cleanUpListedData(eventName, description + finalDescription);
                 continue;
             } else { // Unexpected Behavior (format change likely)
                 alert("Unexpected Behavior (format change likely)");
@@ -487,7 +531,7 @@ function processFileInput(file) {
                 return;
             }
 
-            var location = jsonData[classIndex][1];
+
 
             //makeEvent(eventName, location, description, recurrence, startDateTime, endDateTime)
             
@@ -514,31 +558,81 @@ function processFileInput(file) {
 
         }
         ics += "END:VCALENDAR";
-
-
-        // console.log(calendar)
-        
-        
-
-
-        // Problem 1 is the fact that dates are being rendered as equations and being turned into a number
-        // Fixed through digging through the raw data for the strings
-
-
-        // const csv = XLSX.utils.sheet_to_csv(worksheet);
-        // const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-        // const link = document.createElement('a');
-        // link.href = URL.createObjectURL(blob);
-        // link.download = 'output.csv';
-        // link.click();
-
-        
     };
 
     reader.readAsArrayBuffer(file);
 }
+
+function downloadICSFile() {
+    //alert(selectedFile)
+    if (ics == "" || selectedFile == null) {
+        return
+    }
+    //const fileContent = "This is the content of the file."; // Or the actual File object
+    const blob = new Blob([ics], { type: "text/plain" }); // Adjust type as needed
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const nameInput = document.getElementById('nameInput');
+    // console.log(nameInput.value);
+    if (nameInput.value != "") {
+        namePerson = nameInput.value; 
+        console.log(namePerson);
+    }
+    a.download = namePerson + " " + icsFileName + ".ics"; // Desired filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+function downloadBreakDownFile() {
+    //alert(selectedFile)
+    if (classBreakDownString == "" || selectedFile == null) {
+        return
+    }
+    //const fileContent = "This is the content of the file."; // Or the actual File object
+    const blob = new Blob([classBreakDownString], { type: "text/plain" }); // Adjust type as needed
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const nameInput = document.getElementById('nameInput');
+    // console.log(nameInput.value);
+    if (nameInput.value != "") {
+        namePerson = nameInput.value; 
+        console.log(namePerson);
+    }
+    a.download = namePerson + " " + icsFileName + " BreakDown.txt"; // Desired filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+function downloadAccomendationFile() {
+    //alert(selectedFile)
+    if (accomendationScheduleString == "" || selectedFile == null) {
+        return
+    }
+    //const fileContent = "This is the content of the file."; // Or the actual File object
+    const blob = new Blob([accomendationScheduleString], { type: "text/plain" }); // Adjust type as needed
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const nameInput = document.getElementById('nameInput');
+    // console.log(nameInput.value);
+    if (nameInput.value != "") {
+        namePerson = nameInput.value; 
+        console.log(namePerson);
+    }
+    a.download = namePerson + " " + icsFileName + " Accomendation.txt"; // Desired filename
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
 const fileInput = document.getElementById('fileInput');
 let selectedFile = null;
+
 fileInput.addEventListener('change', (event) => {
         console.log("changed file");
         selectedFile = event.target.files[0];
@@ -556,8 +650,34 @@ convertButton.addEventListener('click', function() {
         }
         // console.log("Button pressed");
         // console.log(selectedFile.name);
-        downloadSubmittedFile();
+        downloadICSFile();
 });
+const accomendationButton = document.getElementById('accomendationsButton');
+accomendationButton.addEventListener('click', function() {
+        // Code to execute when the button is clicked
+        //alert('Button clicked!');
+        if (selectedFile == null) {
+            alert("Please select your file first!");
+            return;
+        }
+        // console.log("Button pressed");
+        // console.log(selectedFile.name);
+        downloadAccomendationFile();
+});
+
+const breakDownButton = document.getElementById('notesOfClassesButton');
+breakDownButton.addEventListener('click', function() {
+        // Code to execute when the button is clicked
+        //alert('Button clicked!');
+        if (selectedFile == null) {
+            alert("Please select your file first!");
+            return;
+        }
+        // console.log("Button pressed");
+        // console.log(selectedFile.name);
+        downloadBreakDownFile();
+});
+
 
 
 
