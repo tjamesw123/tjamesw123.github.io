@@ -404,12 +404,15 @@ function processFileInput(file) {
             // 10: "Tuesday/Thursday | 9:30 AM - 10:45 AM | Edwin A. Stevens 214"
             // 10: "| Webcampus"
 
+            console.log(jsonData[classIndex][10]);
             // Counting the number of bars to determine the type of string that is going to be parsed 
             var numOfBar = 0 
-            for (const char of jsonData[classIndex][10]) {
-                //console.log(char);
-                if (char == '|') {
-                    numOfBar += 1
+            if (jsonData[classIndex][10] != undefined) {
+                for (const char of jsonData[classIndex][10]) {
+                    //console.log(char);
+                    if (char == '|') {
+                        numOfBar += 1
+                    }
                 }
             }
             console.log(numOfBar);
@@ -517,7 +520,7 @@ function processFileInput(file) {
                 var date = getNextDateOfDayFromDate(startDay, getStartDay(eventArray[0], startDay));
                 classBreakDownString += cleanUpListedData(eventName, description + additionDescription + finalDescription);
                 ics += makeEvent(eventName, address, description + additionDescription + finalDescription, recurrence, startTime, endTime, date);
-            } else if (numOfBar == 1) { // Webcampus
+            } else if (numOfBar == 1 || numOfBar == 0) { // Webcampus
                 console.log("Webcampus");
                 address = "Webcampus";
                 startTime = "";
