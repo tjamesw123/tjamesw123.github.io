@@ -30,7 +30,7 @@
       border: 40px solid #20c4c7;
       color: #83e36b;
     }
-    h1, h4, p {
+    h1, h4, p, label {
         color: white
     }
     </style>
@@ -50,6 +50,9 @@
         <p>Before upload do a save as in excel or however you manage your spreadsheets and give it any other name then View My Courses to get it into the correct format</p>
         <h4>Name Override (leave blank if you just want to use your on record name)</h4>
         <input type="text" id="nameInput">
+        <br><br>
+        <input type="checkbox" id="addressOverride" name="addressOverride" value="addressOverride">
+        <label for="addressOverride"> Put building name and room number into address and not actual address</label>
         <br><br>
         <input type="file" id="fileInput">
         <br><br>

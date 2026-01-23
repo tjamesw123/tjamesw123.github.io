@@ -473,6 +473,11 @@ function processFileInput(file) {
 
             // Accomendation String Processing and full scheduling string
 
+            const checkbox = document.getElementById('addressOverride');
+
+            const isChecked = checkbox.checked;
+
+            console.log(checkbox);
 
             
             if (numOfBar == 4) {
@@ -488,7 +493,7 @@ function processFileInput(file) {
                     }
                     var eventArray = eventSplit[g].split(" | ");
                     if (additionDescriptionNeeded) {
-                        address = getAddressFromRaw(eventArray[2]);
+                        address = isChecked ? eventArray[2] : getAddressFromRaw(eventArray[2]);
                         additionDescription += " (" + eventArray[2] + ")\\n";
                     }
                     recurrence = makeRecurrenceString(endDay, eventArray[0]);
@@ -510,7 +515,7 @@ function processFileInput(file) {
                 }
                 var eventArray = jsonData[classIndex][10].split(" | ");
                 if (additionDescriptionNeeded) {
-                    address = getAddressFromRaw(eventArray[2]);
+                    address = isChecked ? eventArray[2] : getAddressFromRaw(eventArray[2]);
                     additionDescription += " (" + eventArray[2] + ")\\n";
                 }
                 recurrence = makeRecurrenceString(endDay, eventArray[0]);
