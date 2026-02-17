@@ -325,7 +325,7 @@ function processFileInput(file) {
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
         //const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        const jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: 1, cellText: true}); // getting somewhere // header: 1, defval: "" raw: true
+        let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: 1, cellText: true}); // getting somewhere // header: 1, defval: "" raw: true
         console.log(workbook);
         console.log(jsonData);
         console.log("Onload has run");
@@ -342,6 +342,9 @@ function processFileInput(file) {
 
         // My Enrolled Courses
 
+
+        // Extra Detail: check for Withdraw vs Drop
+
         var firstSheet = workbook.Sheets[workbook.SheetNames[0]];
 
         var startingIndex = 3
@@ -351,6 +354,18 @@ function processFileInput(file) {
         } else {
             console.log("Format 2!");
         }
+
+        console.log(jsonData[startingIndex-1][2]);
+
+        let versionWithdraw = false;
+        if (jsonData[startingIndex-1][2] == "Withdraw") { // Covers for the extra gap of the extra row
+            console.log("Withdraw Version");
+            versionWithdraw = true;
+        } else {
+            console.log("Swap Version");
+            versionWithdraw = false;
+        }
+
 
         ics = "BEGIN:VCALENDAR\n";
 
@@ -371,12 +386,20 @@ function processFileInput(file) {
 
 
         for (var classIndex = startingIndex; classIndex < jsonData.length && jsonData[classIndex][0] != " " && jsonData[classIndex][0] != "Enrolled Units"; classIndex++) {
-
+            
             console.log(jsonData[classIndex]);
             console.log(firstSheet);
-            // console.log(getDatesFromRow(firstSheet, classIndex));
-            jsonData[classIndex][12] = firstSheet['M'+(classIndex+1).toString()]['w']
-            jsonData[classIndex][13] = firstSheet['N'+(classIndex+1).toString()]['w']
+            console.log(firstSheet['N'+(classIndex+1).toString()]);
+            if (versionWithdraw) {
+                jsonData[classIndex].splice(2, 0, null);
+                jsonData[classIndex][12] = firstSheet['L'+(classIndex+1).toString()]['w'];
+                jsonData[classIndex][13] = firstSheet['M'+(classIndex+1).toString()]['w'];
+            } else {
+                jsonData[classIndex][12] = firstSheet['M'+(classIndex+1).toString()]['w'];
+                jsonData[classIndex][13] = firstSheet['N'+(classIndex+1).toString()]['w'];
+            }
+            
+            
             console.log(jsonData[classIndex]); // After dates as strings have been reinstated
 
             // Start Day
