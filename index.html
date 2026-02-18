@@ -2,50 +2,39 @@
 <html>
     <head>
     <title>tjamesw - Home</title>
-    <style>
-        
-    ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-    overflow: hidden;
-    background-color: #333;
-    }
-
-    li {
-    float: left;
-    }
-
-    li a {
-    display: block;
-    color: white;
-    text-align: center;
-    padding: 14px 16px;
-    text-decoration: none;
-    }
-
-    /* Change the link color to #111 (black) on hover */
-    li a:hover {
-    background-color: #111;
-    }
-
-    .center {
-      text-align: center;
-      border: 40px solid #20c4c7;
-      color: #83e36b;
-    }
-    </style>
+    <link rel="stylesheet" href="style.css">
     </head>
 <body style="background-color:#3284c2">
 <ul>
-  <li><a href="./">Home</a></li>
-  <li><a href="https://cloud.tjamesw.dev/">Nextcloud</a></li>
-  <li><a href="ical.html">WorkdaySpreadsheetToCalendar</a></li>
+  <li class="menu"><a class=menua href="./">Home</a></li>
+  <li class="menu"><a class=menua href="ical.html">WorkdaySpreadsheetToCalendar</a></li>
 </ul>
   <div class="center">
     <h1>Home</h1>
     <h2>tjamesw.dev</h2>
-    <p>In Development</p>
+    <h3>Projects</h3>
+    <div class="project-div">
+      <h4>Conways Game Of Life</h4>
+      <p>Implemented the classic Conways' Game Of Life automata which is GPU accelerated through a compute shader using SDL_GPU (cross platform) and HLSL and C</p>
+      <video loop controls autoplay muted width="500", height="400" >
+        <source src="Conwaysgameoflife3.mp4" type="video/mp4" />
+        
+      </video>
+    </div>
+    <div class="project-div">
+      <h4>Colorful Sand Simulation</h4>
+      <p>Made a colorful sand simulation that is GPU accelerated through a compute shader using SDL_GPU (cross platform) and HLSL and C</p>
+      <video loop controls autoplay muted width="500", height="400" >
+        <source src="ColorfulSandSim.mp4" type="video/mp4" />
+        
+      </video>
+    </div>
+    <div class="project-div">
+      <h4>Workday Class Spreadsheet to iCalendar</h4>
+      <img src="image.png">
+      <p>Made a Javascript client side only converter from an excel spreadsheet provided by Workday with class infomation on it to a working iCalendar file supported by most calendar apps</p>
+      <a href="ical.html">Click here to see the program directly!</a>
+    </div>
   </div>
 </body>
 </html>

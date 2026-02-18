@@ -1,0 +1,35 @@
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+.menu {
+    float: left;
+}
+
+.menua {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+
+/* Change the link color to #111 (black) on hover */
+.menua:hover {
+    background-color: #111;
+}
+
+.center {
+    text-align: center;
+    border: 40px solid #20c4c7;
+    color: #83e36b;
+}
+.project-div {
+    text-align: center;
+    border: 10px solid #20c787;
+    color: #83e36b;
+}
