@@ -315,6 +315,7 @@ function processFileInput(file) {
         // Do something with the JSON data
         const data = new Uint8Array(e.target.result);
         const workbook = XLSX.read(data, { type: 'array' }); // WTF: true
+        // console.log(workbook);
         // Get the array of sheet names
         const sheetNames = workbook.SheetNames;
 
@@ -324,9 +325,32 @@ function processFileInput(file) {
         // Process the workbook (e.g., convert to JSON)
         const firstSheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[firstSheetName];
+
+
+        let worksheetKeys = Object.keys(worksheet).sort().filter((word) => word.charAt(0) != "!")
+        console.log(worksheetKeys);
+
+        let maxLetter = "A";
+        let maxA = 0;
+        for (let i = 0; i < worksheetKeys.length; i++) { // worksheet['A'+i] != undefined
+            if (worksheetKeys[i].charAt(0) == 'A') {
+                if (maxA < parseInt(worksheetKeys[i].substring(1))) {
+                    maxA = parseInt(worksheetKeys[i].substring(1));
+                } 
+            }
+            if (worksheetKeys[i].charAt(0) > maxLetter) {
+                maxLetter = worksheetKeys[i].charAt(0);
+            }
+        }
+        console.log(maxA);
+        console.log(maxLetter);
+
         //const jsonData = XLSX.utils.sheet_to_json(worksheet);
-        let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: 1, cellText: true}); // getting somewhere // header: 1, defval: "" raw: true
+        // let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: 1, cellText: true}); // getting somewhere // header: 1, defval: "" raw: true
+        // let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: 1, cellText: true, range: 'A1:N17'}); // need to calc what N17 needs to be
+        let jsonData = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: 1, cellText: true, range: 'A1:' + maxLetter + "" + maxA});
         console.log(workbook);
+        console.log(worksheet);
         console.log(jsonData);
         console.log("Onload has run");
         // There are two formats that you got to be able to handle:
@@ -355,6 +379,7 @@ function processFileInput(file) {
             console.log("Format 2!");
         }
 
+        console.log(jsonData[startingIndex-1]);
         console.log(jsonData[startingIndex-1][2]);
 
         let versionWithdraw = false;
